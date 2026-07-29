@@ -33,24 +33,21 @@ export async function login({ email, senha }: LoginBody) {
     throw new ErroLogin('Email ou senha inválidos.');
   }
 
-  const token = gerarToken({
-    usuarioId: usuario.id.toString(),
-    empresaId: usuario.empresaId.toString(),
-    role: usuario.role,
-  });
-await auditoriaService.registrar({
-
-  empresaId: usuario.empresaId,
-
-  usuarioId: usuario.id,
-
-  acao: "LOGIN_REALIZADO",
-
-  detalhes: `Usuário ${usuario.nome} realizou login`
-
-
-
+ const token = gerarToken({
+  usuarioId: usuario.id.toString(),
+  empresaId: usuario.empresaId
+    ? usuario.empresaId.toString()
+    : null,
+  role: usuario.role,
 });
+if (usuario.empresaId) {
+  await auditoriaService.registrar({
+    empresaId: usuario.empresaId,
+    usuarioId: usuario.id,
+    acao: "LOGIN_REALIZADO",
+    detalhes: `Usuário ${usuario.nome} realizou login`
+  });
+}
 
   return {
     token,
@@ -60,9 +57,11 @@ await auditoriaService.registrar({
       email: usuario.email,
       role: usuario.role,
     },
-    empresa: {
+ empresa: usuario.empresa
+  ? {
       id: usuario.empresa.id.toString(),
       nome: usuario.empresa.nome,
-    },
+    }
+  : null,
   };
 }
