@@ -15,6 +15,7 @@ export default async function dashboardRoutes(
       preHandler: [
         authMiddleware,
         verificarRole([
+          'master',
           'admin',
           'gerente'
         ])
