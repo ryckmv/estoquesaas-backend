@@ -3,7 +3,7 @@ import { verificarToken } from '../utils/jwt.js';
 
 interface TokenPayload {
   usuarioId: string;
-  empresaId: string;
+  empresaId: string | null;
   role: string;
 }
 
@@ -25,10 +25,13 @@ export async function authMiddleware(
 
     const payload = verificarToken(token) as TokenPayload;
 
-    request.usuarioId = BigInt(payload.usuarioId);
-    request.empresaId = BigInt(payload.empresaId);
-    request.role = payload.role;
-     
+   request.usuarioId = BigInt(payload.usuarioId);
+
+if (payload.empresaId) {
+  request.empresaId = BigInt(payload.empresaId);
+}
+
+request.role = payload.role;
 
   } catch {
     return reply.status(401).send({

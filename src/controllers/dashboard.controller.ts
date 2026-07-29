@@ -3,7 +3,6 @@ import { DashboardService } from "../services/dashboard.service.js";
 
 const dashboardService = new DashboardService();
 
-
 export class DashboardController {
 
   async resumo(
@@ -11,11 +10,34 @@ export class DashboardController {
     reply: FastifyReply
   ) {
 
-    const { empresaId } = request;
+    const { empresaId, role } = request;
 
-    const dados = await dashboardService.resumo(
-      empresaId!
-    );
+    let dados;
+
+
+    // MASTER NÃO POSSUI EMPRESA
+    if (role === "master") {
+
+      dados = await dashboardService.resumoMaster();
+
+    } else {
+
+
+      // USUÁRIOS NORMAIS PRECISAM DE EMPRESA
+      if (!empresaId) {
+
+        return reply.status(401).send({
+          erro: "Usuário sem empresa vinculada."
+        });
+
+      }
+
+
+      dados = await dashboardService.resumo(
+        empresaId
+      );
+
+    }
 
 
     return reply.send(
