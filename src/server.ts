@@ -17,20 +17,21 @@ import relatorioRoutes from './routes/relatorio.routes.js';
 import { auditoriaRoutes } from './routes/auditoria.routes.js';
 import { configuracaoRoutes } from "./routes/configuracao.routes.js";
 
-
 dotenv.config();
-
 
 const app = Fastify({
   logger: true
 });
 
-
-
-
+// ✅ CORREÇÃO APLICADA: CORS registrado no topo para liberar o acesso da Vercel
+await app.register(cors, {
+  origin: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+});
 
 errorHandler(app);
-
 
 // Rota inicial
 app.get('/', async () => {
@@ -40,32 +41,23 @@ app.get('/', async () => {
   };
 });
 
-
 // Teste de conexão com banco
 app.get('/health', async (request, reply) => {
   try {
-
     const result = await prisma.$queryRaw`SELECT NOW()`;
-
     return {
       status: 'online',
       database_time: (result as any)[0].now
     };
-
   } catch (error: any) {
-
     console.error('ERRO DETALHADO DO BANCO:', error);
-
     reply.status(500);
-
     return {
       status: 'error',
       message: error.message
     };
-
   }
 });
-
 
 // Registro das rotas
 app.register(usuarioRoutes);
@@ -81,17 +73,9 @@ app.register(relatorioRoutes);
 app.register(auditoriaRoutes);
 app.register(configuracaoRoutes);
 
-
 // Inicialização do servidor
 const start = async () => {
-
   try {
-
-    await app.register(cors, {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000"
-    });
-
-
     const port = Number(process.env.PORT) || 3334;
 
     await app.listen({
@@ -99,17 +83,11 @@ const start = async () => {
       host: '0.0.0.0'
     });
 
-
     console.log(`🚀 Servidor rodando na porta ${port}`);
-
-
   } catch (err) {
-
     app.log.error(err);
     process.exit(1);
-
   }
-
 };
 
 start();
