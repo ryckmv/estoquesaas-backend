@@ -144,7 +144,7 @@ enum Role {
   admin
   gerente
   funcionario
-  masterx
+  master
 }
 
 enum TipoMovimentacao {

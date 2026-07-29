@@ -334,12 +334,6 @@ export class UsuarioService {
 
     }
 
-
-
-
-
-
-
     const usuario =
       await prisma.usuario.updateMany({
 
@@ -356,12 +350,6 @@ export class UsuarioService {
 
       });
 
-
-
-
-
-
-
     if (usuario.count === 0) {
 
       throw new AppError(
@@ -371,12 +359,6 @@ export class UsuarioService {
 
     }
 
-
-
-
-
-
-
     return {
 
       mensagem:
@@ -385,11 +367,6 @@ export class UsuarioService {
     };
 
   }
-
-
-
-
-
 
 
 
@@ -420,11 +397,6 @@ export class UsuarioService {
 
       });
 
-
-
-
-
-
     if (usuario.count === 0) {
 
       throw new AppError(
@@ -433,10 +405,6 @@ export class UsuarioService {
       );
 
     }
-
-
-
-
 
 
 
