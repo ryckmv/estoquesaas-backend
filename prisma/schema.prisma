@@ -1,211 +1,164 @@
-  // =========================================================
-  // MVP: Sistema de Estoque / Vendas — Schema Prisma
-  // Banco: PostgreSQL
-  // =========================================================
+generator client {
+  provider = "prisma-client-js"
+}
 
-  generator client {
-    provider = "prisma-client-js"
-  }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-  }
+model Empresa {
+  id            BigInt                @id @default(autoincrement())
+  nome          String                @db.VarChar(150)
+  cnpj          String?               @unique @db.VarChar(18)
+  telefone      String?               @db.VarChar(20)
+  email         String?               @db.VarChar(150)
+  criadoEm      DateTime              @default(now()) @map("criado_em")
+  clientes      Cliente[]
+  logsAuditoria LogAuditoria[]
+  movimentacoes MovimentacaoEstoque[]
+  produtos      Produto[]
+  usuarios      Usuario[]
+  vendas        Venda[]
 
-  // ---------------------------------------------------------
-  // ENUMS
-  // ---------------------------------------------------------
-
-  enum Role {
-    admin
-    gerente
-    funcionario
-  }
-
-  enum TipoMovimentacao {
-    entrada
-    saida
-  }
-
-  enum MotivoMovimentacao {
-    compra
-    ajuste
-    perda
-  }
-
-  enum StatusVenda {
-    confirmada
-    cancelada
-  }
-
-  // ---------------------------------------------------------
-  // EMPRESA
-  // ---------------------------------------------------------
-
-  model Empresa {
-    id        BigInt   @id @default(autoincrement())
-    nome      String   @db.VarChar(150)
-    cnpj      String?  @unique @db.VarChar(18)
-    telefone  String?  @db.VarChar(20)
-    email     String?  @db.VarChar(150)
-    criadoEm  DateTime @default(now()) @map("criado_em")
-
-    usuarios      Usuario[]
-    clientes      Cliente[]
-    produtos      Produto[]
-    vendas        Venda[]
-    movimentacoes MovimentacaoEstoque[]
-    logsAuditoria LogAuditoria[]
-
-    @@map("empresas")
-  }
-
-  // ---------------------------------------------------------
-  // USUARIO
-  // ---------------------------------------------------------
+  @@map("empresas")
+}
 
 model Usuario {
-  id         BigInt   @id @default(autoincrement())
-  empresaId  BigInt   @map("empresa_id")
-  nome       String   @db.VarChar(150)
-
-  // E-mail único no sistema inteiro
-  email      String   @unique @db.VarChar(150)
-
-  senhaHash  String   @map("senha_hash") @db.VarChar(255)
-  role       Role     @default(funcionario)
-  ativo      Boolean  @default(true)
-  criadoEm   DateTime @default(now()) @map("criado_em")
-
-  empresa       Empresa                @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  vendas        Venda[]
-  movimentacoes MovimentacaoEstoque[]
+  id            BigInt                @id @default(autoincrement())
+  empresaId     BigInt?               @map("empresa_id")
+  nome          String                @db.VarChar(150)
+  email         String                @unique @db.VarChar(150)
+  senhaHash     String                @map("senha_hash") @db.VarChar(255)
+  role          Role                  @default(funcionario)
+  ativo         Boolean               @default(true)
+  criadoEm      DateTime              @default(now()) @map("criado_em")
   logsAuditoria LogAuditoria[]
+  movimentacoes MovimentacaoEstoque[]
+  empresa       Empresa?              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  vendas        Venda[]
 
   @@index([empresaId])
   @@map("usuarios")
 }
 
-  // ---------------------------------------------------------
-  // CLIENTE
-  // ---------------------------------------------------------
+model Cliente {
+  id        BigInt   @id @default(autoincrement())
+  empresaId BigInt   @map("empresa_id")
+  nome      String   @db.VarChar(150)
+  telefone  String?  @db.VarChar(20)
+  cpf       String?  @db.VarChar(14)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  vendas    Venda[]
 
-  model Cliente {
-    id        BigInt   @id @default(autoincrement())
-    empresaId BigInt   @map("empresa_id")
-    nome      String   @db.VarChar(150)
-    telefone  String?  @db.VarChar(20)
-    cpf       String?  @db.VarChar(14)
-    criadoEm  DateTime @default(now()) @map("criado_em")
+  @@unique([empresaId, cpf])
+  @@index([empresaId])
+  @@map("clientes")
+}
 
-    empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-    vendas  Venda[]
+model Produto {
+  id            BigInt                @id @default(autoincrement())
+  empresaId     BigInt                @map("empresa_id")
+  nome          String                @db.VarChar(150)
+  codigoBarras  String?               @map("codigo_barras") @db.VarChar(50)
+  precoCusto    Decimal               @default(0) @map("preco_custo") @db.Decimal(12, 2)
+  precoVenda    Decimal               @default(0) @map("preco_venda") @db.Decimal(12, 2)
+  quantidade    Int                   @default(0)
+  estoqueMinimo Int                   @default(0) @map("estoque_minimo")
+  ativo         Boolean               @default(true)
+  criadoEm      DateTime              @default(now()) @map("criado_em")
+  movimentacoes MovimentacaoEstoque[]
+  empresa       Empresa               @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  vendaItens    VendaItem[]
 
-    @@unique([empresaId, cpf])
-    @@index([empresaId])
-    @@map("clientes")
-  }
+  @@unique([empresaId, codigoBarras])
+  @@index([empresaId, nome])
+  @@map("produtos")
+}
 
-  // ---------------------------------------------------------
-  // PRODUTO (já inclui os campos de estoque)
-  // ---------------------------------------------------------
+model MovimentacaoEstoque {
+  id         BigInt             @id @default(autoincrement())
+  empresaId  BigInt             @map("empresa_id")
+  produtoId  BigInt             @map("produto_id")
+  usuarioId  BigInt?            @map("usuario_id")
+  tipo       TipoMovimentacao
+  motivo     MotivoMovimentacao
+  quantidade Int
+  criadoEm   DateTime           @default(now()) @map("criado_em")
+  empresa    Empresa            @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  produto    Produto            @relation(fields: [produtoId], references: [id])
+  usuario    Usuario?           @relation(fields: [usuarioId], references: [id])
 
-  model Produto {
-    id             BigInt   @id @default(autoincrement())
-    empresaId      BigInt   @map("empresa_id")
-    nome           String   @db.VarChar(150)
-    codigoBarras   String?  @map("codigo_barras") @db.VarChar(50)
-    precoCusto     Decimal  @default(0) @map("preco_custo") @db.Decimal(12, 2)
-    precoVenda     Decimal  @default(0) @map("preco_venda") @db.Decimal(12, 2)
-    quantidade     Int      @default(0)
-    estoqueMinimo  Int      @default(0) @map("estoque_minimo")
-    ativo          Boolean  @default(true)
-    criadoEm       DateTime @default(now()) @map("criado_em")
+  @@index([produtoId])
+  @@map("movimentacoes_estoque")
+}
 
-    empresa       Empresa                @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-    movimentacoes MovimentacaoEstoque[]
-    vendaItens    VendaItem[]
+model Venda {
+  id         BigInt      @id @default(autoincrement())
+  empresaId  BigInt      @map("empresa_id")
+  clienteId  BigInt?     @map("cliente_id")
+  usuarioId  BigInt?     @map("usuario_id")
+  status     StatusVenda @default(confirmada)
+  valorTotal Decimal     @default(0) @map("valor_total") @db.Decimal(12, 2)
+  criadoEm   DateTime    @default(now()) @map("criado_em")
+  itens      VendaItem[]
+  cliente    Cliente?    @relation(fields: [clienteId], references: [id])
+  empresa    Empresa     @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  usuario    Usuario?    @relation(fields: [usuarioId], references: [id])
 
-    @@unique([empresaId, codigoBarras])
-    @@index([empresaId, nome])
-    @@map("produtos")
-  }
+  @@index([empresaId, criadoEm])
+  @@map("vendas")
+}
 
-  // ---------------------------------------------------------
-  // MOVIMENTACAO DE ESTOQUE (compra, ajuste, perda)
-  // ---------------------------------------------------------
+model VendaItem {
+  id                 BigInt  @id @default(autoincrement())
+  vendaId            BigInt  @map("venda_id")
+  produtoId          BigInt  @map("produto_id")
+  quantidade         Int
+  precoVendaUnitario Decimal @map("preco_venda_unitario") @db.Decimal(12, 2)
+  precoCustoUnitario Decimal @map("preco_custo_unitario") @db.Decimal(12, 2)
+  produto            Produto @relation(fields: [produtoId], references: [id])
+  venda              Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
 
-  model MovimentacaoEstoque {
-    id         BigInt              @id @default(autoincrement())
-    empresaId  BigInt              @map("empresa_id")
-    produtoId  BigInt              @map("produto_id")
-    usuarioId  BigInt?             @map("usuario_id")
-    tipo       TipoMovimentacao
-    motivo     MotivoMovimentacao
-    quantidade Int
-    criadoEm   DateTime            @default(now()) @map("criado_em")
+  @@index([vendaId])
+  @@index([produtoId])
+  @@map("venda_itens")
+}
 
-    empresa Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-    produto Produto  @relation(fields: [produtoId], references: [id], onDelete: Restrict)
-    usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
-
-    @@index([produtoId])
-    @@map("movimentacoes_estoque")
-  }
-
-  // ---------------------------------------------------------
-  // VENDA (cabeçalho + itens)
-  // ---------------------------------------------------------
-
-  model Venda {
-    id          BigInt      @id @default(autoincrement())
-    empresaId   BigInt      @map("empresa_id")
-    clienteId   BigInt?     @map("cliente_id")
-    usuarioId   BigInt?     @map("usuario_id")
-    status      StatusVenda @default(confirmada)
-    valorTotal  Decimal     @default(0) @map("valor_total") @db.Decimal(12, 2)
-    criadoEm    DateTime    @default(now()) @map("criado_em")
-
-    empresa Empresa     @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-    cliente Cliente?    @relation(fields: [clienteId], references: [id], onDelete: SetNull)
-    usuario Usuario?    @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
-    itens   VendaItem[]
-
-    @@index([empresaId, criadoEm])
-    @@map("vendas")
-  }
-
-  model VendaItem {
-    id                  BigInt  @id @default(autoincrement())
-    vendaId             BigInt  @map("venda_id")
-    produtoId           BigInt  @map("produto_id")
-    quantidade          Int
-    precoVendaUnitario  Decimal @map("preco_venda_unitario") @db.Decimal(12, 2)
-    precoCustoUnitario  Decimal @map("preco_custo_unitario") @db.Decimal(12, 2)
-    // precoCustoUnitario guarda uma "foto" do custo no momento da venda,
-    // assim o lucro histórico não muda se o custo do produto mudar depois.
-
-    venda   Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
-    produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
-
-    @@index([vendaId])
-    @@index([produtoId])
-    @@map("venda_itens")
-  }
-
-  model LogAuditoria {
-  id         BigInt    @id @default(autoincrement())
-  empresaId  BigInt    @map("empresa_id")
-  usuarioId  BigInt?   @map("usuario_id")
-  acao       String    // Ex: "PRODUTO_CRIADO", "USUARIO_DESATIVADO"
-  detalhes   String?   // Ex: "Usuário ID 5 desativado"
-  ip         String?   // IP da requisição
-  criadoEm   DateTime  @default(now()) @map("criado_em")
-
-  empresa    Empresa   @relation(fields: [empresaId], references: [id])
-  usuario    Usuario?  @relation(fields: [usuarioId], references: [id])
+model LogAuditoria {
+  id        BigInt   @id @default(autoincrement())
+  empresaId BigInt   @map("empresa_id")
+  usuarioId BigInt?  @map("usuario_id")
+  acao      String
+  detalhes  String?
+  ip        String?
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
 
   @@map("logs_auditoria")
 }
-  
 
+enum Role {
+  admin
+  gerente
+  funcionario
+  masterx
+}
+
+enum TipoMovimentacao {
+  entrada
+  saida
+}
+
+enum MotivoMovimentacao {
+  compra
+  ajuste
+  perda
+}
+
+enum StatusVenda {
+  confirmada
+  cancelada
+}
