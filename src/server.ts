@@ -5,7 +5,7 @@ import { prisma } from './lib/prisma.js';
 
 import empresaRoutes from './routes/empresa.routes.js';
 import produtoRoutes from './routes/produto.routes.js';
-import clienteRoutes from './routes/cliente.routes';
+import clienteRoutes from './routes/cliente.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import movimentacaoRoutes from './routes/movimentacao.routes.js';

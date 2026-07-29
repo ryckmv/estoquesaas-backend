@@ -1,18 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClienteService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-const AppError_js_1 = require("../errors/AppError.js");
-class ClienteService {
+import { prisma } from '../lib/prisma.js';
+import { AppError } from '../errors/AppError.js';
+export class ClienteService {
     async create(data) {
         if (!data.nome || !data.nome.trim()) {
-            throw new AppError_js_1.AppError('Nome do cliente é obrigatório.', 400);
+            throw new AppError('Nome do cliente é obrigatório.', 400);
         }
         if (data.cpf &&
             !/^\d{11}$/.test(data.cpf)) {
-            throw new AppError_js_1.AppError('CPF deve conter 11 números.', 400);
+            throw new AppError('CPF deve conter 11 números.', 400);
         }
-        const cliente = await prisma_js_1.prisma.cliente.create({
+        const cliente = await prisma.cliente.create({
             data: {
                 empresaId: BigInt(data.empresaId),
                 nome: data.nome,
@@ -23,7 +20,7 @@ class ClienteService {
         return cliente;
     }
     async listByEmpresa(empresaId) {
-        return prisma_js_1.prisma.cliente.findMany({
+        return prisma.cliente.findMany({
             where: {
                 empresaId: BigInt(empresaId)
             },
@@ -33,28 +30,28 @@ class ClienteService {
         });
     }
     async findById(id, empresaId) {
-        const cliente = await prisma_js_1.prisma.cliente.findFirst({
+        const cliente = await prisma.cliente.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
             }
         });
         if (!cliente) {
-            throw new AppError_js_1.AppError('Cliente não encontrado.', 404);
+            throw new AppError('Cliente não encontrado.', 404);
         }
         return cliente;
     }
     async update(id, empresaId, data) {
-        const cliente = await prisma_js_1.prisma.cliente.findFirst({
+        const cliente = await prisma.cliente.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
             }
         });
         if (!cliente) {
-            throw new AppError_js_1.AppError('Cliente não encontrado.', 404);
+            throw new AppError('Cliente não encontrado.', 404);
         }
-        return prisma_js_1.prisma.cliente.update({
+        return prisma.cliente.update({
             where: {
                 id: BigInt(id)
             },
@@ -66,20 +63,19 @@ class ClienteService {
         });
     }
     async delete(id, empresaId) {
-        const cliente = await prisma_js_1.prisma.cliente.findFirst({
+        const cliente = await prisma.cliente.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
             }
         });
         if (!cliente) {
-            throw new AppError_js_1.AppError('Cliente não encontrado.', 404);
+            throw new AppError('Cliente não encontrado.', 404);
         }
-        return prisma_js_1.prisma.cliente.delete({
+        return prisma.cliente.delete({
             where: {
                 id: BigInt(id)
             }
         });
     }
 }
-exports.ClienteService = ClienteService;

@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ConfiguracaoController = void 0;
-const configuracao_service_js_1 = require("../services/configuracao.service.js");
-const service = new configuracao_service_js_1.ConfiguracaoService();
-class ConfiguracaoController {
+import { ConfiguracaoService } from "../services/configuracao.service.js";
+const service = new ConfiguracaoService();
+export class ConfiguracaoController {
     async buscar(request, reply) {
         const empresaId = request.empresaId;
         const empresa = await service.buscarEmpresa(empresaId);
@@ -36,4 +33,3 @@ class ConfiguracaoController {
         });
     }
 }
-exports.ConfiguracaoController = ConfiguracaoController;

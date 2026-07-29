@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.verificarRole = verificarRole;
-function verificarRole(rolesPermitidas) {
+export function verificarRole(rolesPermitidas) {
     return async function (request, reply) {
         const role = request.role;
         console.log("ROLE RECEBIDA NO ROLE MIDDLEWARE:", role);

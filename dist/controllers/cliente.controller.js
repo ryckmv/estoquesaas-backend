@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClienteController = void 0;
-const cliente_service_js_1 = require("../services/cliente.service.js");
-const auditoria_service_js_1 = require("../services/auditoria.service.js");
-const clienteService = new cliente_service_js_1.ClienteService();
-const auditoriaService = new auditoria_service_js_1.AuditoriaService();
-class ClienteController {
+import { ClienteService } from '../services/cliente.service.js';
+import { AuditoriaService } from '../services/auditoria.service.js';
+const clienteService = new ClienteService();
+const auditoriaService = new AuditoriaService();
+export class ClienteController {
     async create(request, reply) {
         const body = request.body;
         if (!body.nome) {
@@ -94,4 +91,3 @@ class ClienteController {
         });
     }
 }
-exports.ClienteController = ClienteController;

@@ -1,30 +1,25 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const fastify_1 = __importDefault(require("fastify"));
-const cors_1 = __importDefault(require("@fastify/cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const prisma_js_1 = require("./lib/prisma.js");
-const empresa_routes_js_1 = __importDefault(require("./routes/empresa.routes.js"));
-const produto_routes_js_1 = __importDefault(require("./routes/produto.routes.js"));
-const cliente_routes_1 = __importDefault(require("./routes/cliente.routes"));
-const auth_routes_js_1 = __importDefault(require("./routes/auth.routes.js"));
-const user_routes_js_1 = __importDefault(require("./routes/user.routes.js"));
-const movimentacao_routes_js_1 = __importDefault(require("./routes/movimentacao.routes.js"));
-const venda_routes_js_1 = __importDefault(require("./routes/venda.routes.js"));
-const dashboard_routes_js_1 = __importDefault(require("./routes/dashboard.routes.js"));
-const usuario_routes_js_1 = __importDefault(require("./routes/usuario.routes.js"));
-const error_handler_js_1 = require("./errors/error-handler.js");
-const relatorio_routes_js_1 = __importDefault(require("./routes/relatorio.routes.js"));
-const auditoria_routes_js_1 = require("./routes/auditoria.routes.js");
-const configuracao_routes_js_1 = require("./routes/configuracao.routes.js");
-dotenv_1.default.config();
-const app = (0, fastify_1.default)({
+import Fastify from 'fastify';
+import cors from "@fastify/cors";
+import dotenv from 'dotenv';
+import { prisma } from './lib/prisma.js';
+import empresaRoutes from './routes/empresa.routes.js';
+import produtoRoutes from './routes/produto.routes.js';
+import clienteRoutes from './routes/cliente.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import movimentacaoRoutes from './routes/movimentacao.routes.js';
+import vendaRoutes from './routes/venda.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
+import usuarioRoutes from './routes/usuario.routes.js';
+import { errorHandler } from './errors/error-handler.js';
+import relatorioRoutes from './routes/relatorio.routes.js';
+import { auditoriaRoutes } from './routes/auditoria.routes.js';
+import { configuracaoRoutes } from "./routes/configuracao.routes.js";
+dotenv.config();
+const app = Fastify({
     logger: true
 });
-(0, error_handler_js_1.errorHandler)(app);
+errorHandler(app);
 // Rota inicial
 app.get('/', async () => {
     return {
@@ -35,7 +30,7 @@ app.get('/', async () => {
 // Teste de conexão com banco
 app.get('/health', async (request, reply) => {
     try {
-        const result = await prisma_js_1.prisma.$queryRaw `SELECT NOW()`;
+        const result = await prisma.$queryRaw `SELECT NOW()`;
         return {
             status: 'online',
             database_time: result[0].now
@@ -51,22 +46,22 @@ app.get('/health', async (request, reply) => {
     }
 });
 // Registro das rotas
-app.register(usuario_routes_js_1.default);
-app.register(empresa_routes_js_1.default);
-app.register(produto_routes_js_1.default);
-app.register(cliente_routes_1.default);
-app.register(auth_routes_js_1.default);
-app.register(user_routes_js_1.default);
-app.register(movimentacao_routes_js_1.default);
-app.register(venda_routes_js_1.default);
-app.register(dashboard_routes_js_1.default);
-app.register(relatorio_routes_js_1.default);
-app.register(auditoria_routes_js_1.auditoriaRoutes);
-app.register(configuracao_routes_js_1.configuracaoRoutes);
+app.register(usuarioRoutes);
+app.register(empresaRoutes);
+app.register(produtoRoutes);
+app.register(clienteRoutes);
+app.register(authRoutes);
+app.register(userRoutes);
+app.register(movimentacaoRoutes);
+app.register(vendaRoutes);
+app.register(dashboardRoutes);
+app.register(relatorioRoutes);
+app.register(auditoriaRoutes);
+app.register(configuracaoRoutes);
 // Inicialização do servidor
 const start = async () => {
     try {
-        await app.register(cors_1.default, {
+        await app.register(cors, {
             origin: process.env.FRONTEND_URL || "http://localhost:3000"
         });
         const port = Number(process.env.PORT) || 3334;

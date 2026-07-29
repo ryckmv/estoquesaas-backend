@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DashboardService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-class DashboardService {
+import { prisma } from '../lib/prisma.js';
+export class DashboardService {
     async resumo(empresaId) {
         const empresa = BigInt(empresaId);
         const [resumo, financeiro, estoque, ultimasVendas, graficoVendas, produtosMaisVendidos] = await Promise.all([
@@ -27,24 +24,24 @@ class DashboardService {
     // =====================================================
     async buscarResumo(empresaId) {
         const [produtos, clientes, usuarios, vendas] = await Promise.all([
-            prisma_js_1.prisma.produto.count({
+            prisma.produto.count({
                 where: {
                     empresaId,
                     ativo: true
                 }
             }),
-            prisma_js_1.prisma.cliente.count({
+            prisma.cliente.count({
                 where: {
                     empresaId
                 }
             }),
-            prisma_js_1.prisma.usuario.count({
+            prisma.usuario.count({
                 where: {
                     empresaId,
                     ativo: true
                 }
             }),
-            prisma_js_1.prisma.venda.count({
+            prisma.venda.count({
                 where: {
                     empresaId,
                     status: 'confirmada'
@@ -68,7 +65,7 @@ class DashboardService {
         const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
         const inicioProximoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
         const [vendasHoje, vendasMes, faturamentoHoje, faturamentoMes] = await Promise.all([
-            prisma_js_1.prisma.venda.count({
+            prisma.venda.count({
                 where: {
                     empresaId,
                     status: 'confirmada',
@@ -78,7 +75,7 @@ class DashboardService {
                     }
                 }
             }),
-            prisma_js_1.prisma.venda.count({
+            prisma.venda.count({
                 where: {
                     empresaId,
                     status: 'confirmada',
@@ -88,7 +85,7 @@ class DashboardService {
                     }
                 }
             }),
-            prisma_js_1.prisma.venda.aggregate({
+            prisma.venda.aggregate({
                 where: {
                     empresaId,
                     status: 'confirmada',
@@ -101,7 +98,7 @@ class DashboardService {
                     valorTotal: true
                 }
             }),
-            prisma_js_1.prisma.venda.aggregate({
+            prisma.venda.aggregate({
                 where: {
                     empresaId,
                     status: 'confirmada',
@@ -126,7 +123,7 @@ class DashboardService {
     // ESTOQUE
     // =====================================================
     async buscarEstoque(empresaId) {
-        const produtos = await prisma_js_1.prisma.produto.findMany({
+        const produtos = await prisma.produto.findMany({
             where: {
                 empresaId,
                 ativo: true
@@ -162,7 +159,7 @@ class DashboardService {
     // ÚLTIMAS VENDAS
     // =====================================================
     async buscarUltimasVendas(empresaId) {
-        const vendas = await prisma_js_1.prisma.venda.findMany({
+        const vendas = await prisma.venda.findMany({
             where: {
                 empresaId
             },
@@ -200,7 +197,7 @@ class DashboardService {
         const hoje = new Date();
         const inicio = new Date();
         inicio.setDate(hoje.getDate() - 6);
-        const vendas = await prisma_js_1.prisma.venda.findMany({
+        const vendas = await prisma.venda.findMany({
             where: {
                 empresaId,
                 criadoEm: {
@@ -242,7 +239,7 @@ class DashboardService {
         return dias;
     }
     async buscarProdutosMaisVendidos(empresaId) {
-        const itens = await prisma_js_1.prisma.vendaItem.findMany({
+        const itens = await prisma.vendaItem.findMany({
             where: {
                 venda: {
                     empresaId,
@@ -275,4 +272,3 @@ class DashboardService {
             .slice(0, 5);
     }
 }
-exports.DashboardService = DashboardService;

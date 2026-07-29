@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuditoriaController = void 0;
-const auditoria_service_js_1 = require("../services/auditoria.service.js");
-const auditoriaService = new auditoria_service_js_1.AuditoriaService();
-class AuditoriaController {
+import { AuditoriaService } from "../services/auditoria.service.js";
+const auditoriaService = new AuditoriaService();
+export class AuditoriaController {
     async listar(request, reply) {
         const logs = await auditoriaService.listar(request.empresaId);
         return reply.send({
@@ -21,4 +18,3 @@ class AuditoriaController {
         });
     }
 }
-exports.AuditoriaController = AuditoriaController;

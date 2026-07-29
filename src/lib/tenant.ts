@@ -16,7 +16,7 @@
 // TenantPrismaClient continuam 100% tipados normalmente
 // (db.produto, db.venda, autocomplete, etc.).
 
-import { prisma } from './prisma';
+import { prisma } from './prisma.js';
 
 const MODELOS_COM_EMPRESA = [
   'usuario',

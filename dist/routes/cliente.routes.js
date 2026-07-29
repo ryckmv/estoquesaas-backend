@@ -1,17 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = clienteRoutes;
-const cliente_controller_js_1 = require("../controllers/cliente.controller.js");
-const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
-const role_middleware_js_1 = require("../middlewares/role.middleware.js");
-const clienteController = new cliente_controller_js_1.ClienteController();
-async function clienteRoutes(app) {
+import { ClienteController } from '../controllers/cliente.controller.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { verificarRole } from '../middlewares/role.middleware.js';
+const clienteController = new ClienteController();
+export default async function clienteRoutes(app) {
     // Criar cliente
     // admin e gerente
     app.post('/clientes', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin',
                 'gerente'
             ])
@@ -21,8 +18,8 @@ async function clienteRoutes(app) {
     // admin, gerente e funcionário
     app.get('/clientes', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin',
                 'gerente',
                 'funcionario'
@@ -33,8 +30,8 @@ async function clienteRoutes(app) {
     // admin, gerente e funcionário
     app.get('/clientes/:id', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin',
                 'gerente',
                 'funcionario'
@@ -45,8 +42,8 @@ async function clienteRoutes(app) {
     // admin e gerente
     app.put('/clientes/:id', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin',
                 'gerente'
             ])
@@ -56,8 +53,8 @@ async function clienteRoutes(app) {
     // somente admin
     app.delete('/clientes/:id', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin'
             ])
         ]

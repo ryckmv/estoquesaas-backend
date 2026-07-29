@@ -1,4 +1,3 @@
-"use strict";
 // lib/tenant.ts
 //
 // Aqui mora o "lugar central" do filtro por empresa.
@@ -16,9 +15,7 @@
 // isso sozinho nesse tipo de extensão. Os services que usam
 // TenantPrismaClient continuam 100% tipados normalmente
 // (db.produto, db.venda, autocomplete, etc.).
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTenantClient = createTenantClient;
-const prisma_1 = require("./prisma");
+import { prisma } from './prisma.js';
 const MODELOS_COM_EMPRESA = [
     'usuario',
     'cliente',
@@ -26,8 +23,8 @@ const MODELOS_COM_EMPRESA = [
     'movimentacaoEstoque',
     'venda',
 ];
-function createTenantClient(empresaId) {
-    const client = prisma_1.prisma.$extends({
+export function createTenantClient(empresaId) {
+    const client = prisma.$extends({
         name: 'tenant-scope',
         query: {
             $allModels: {

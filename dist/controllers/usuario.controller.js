@@ -1,14 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsuarioController = void 0;
-const usuario_service_js_1 = require("../services/usuario.service.js");
+import { UsuarioService } from '../services/usuario.service.js';
 function serializarBigInt(obj) {
     return JSON.parse(JSON.stringify(obj, (_, value) => typeof value === 'bigint'
         ? value.toString()
         : value));
 }
-const usuarioService = new usuario_service_js_1.UsuarioService();
-class UsuarioController {
+const usuarioService = new UsuarioService();
+export class UsuarioController {
     async criar(request, reply) {
         const body = request.body;
         const usuario = await usuarioService.criar({
@@ -47,4 +44,3 @@ class UsuarioController {
         return reply.send(resultado);
     }
 }
-exports.UsuarioController = UsuarioController;

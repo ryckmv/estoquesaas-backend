@@ -1,17 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RelatorioService = void 0;
-const pdfkit_1 = __importDefault(require("pdfkit"));
-const exceljs_1 = __importDefault(require("exceljs"));
-const dashboard_service_js_1 = require("./dashboard.service.js");
-const dashboardService = new dashboard_service_js_1.DashboardService();
-class RelatorioService {
+import PDFDocument from "pdfkit";
+import ExcelJS from "exceljs";
+import { DashboardService } from "./dashboard.service.js";
+const dashboardService = new DashboardService();
+export class RelatorioService {
     async gerarPDF(reply, empresaId) {
         const dados = await dashboardService.resumo(empresaId);
-        const doc = new pdfkit_1.default({
+        const doc = new PDFDocument({
             margin: 40,
             size: "A4"
         });
@@ -120,7 +114,7 @@ class RelatorioService {
     }
     async gerarExcel(reply, empresaId) {
         const dados = await dashboardService.resumo(empresaId);
-        const workbook = new exceljs_1.default.Workbook();
+        const workbook = new ExcelJS.Workbook();
         workbook.creator = "Estoque SaaS";
         workbook.created = new Date();
         const headerStyle = {
@@ -254,4 +248,3 @@ class RelatorioService {
             .send(Buffer.from(excelBuffer));
     }
 }
-exports.RelatorioService = RelatorioService;

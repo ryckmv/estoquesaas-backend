@@ -1,10 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuditoriaService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-class AuditoriaService {
+import { prisma } from "../lib/prisma.js";
+export class AuditoriaService {
     async registrar({ empresaId, usuarioId, acao, detalhes, ip }) {
-        return prisma_js_1.prisma.logAuditoria.create({
+        return prisma.logAuditoria.create({
             data: {
                 empresaId: BigInt(empresaId),
                 usuarioId: usuarioId
@@ -17,7 +14,7 @@ class AuditoriaService {
         });
     }
     async listar(empresaId) {
-        return prisma_js_1.prisma.logAuditoria.findMany({
+        return prisma.logAuditoria.findMany({
             where: {
                 empresaId: BigInt(empresaId)
             },
@@ -34,4 +31,3 @@ class AuditoriaService {
         });
     }
 }
-exports.AuditoriaService = AuditoriaService;

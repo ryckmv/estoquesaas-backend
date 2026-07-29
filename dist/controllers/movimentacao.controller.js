@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MovimentacaoController = void 0;
-const movimentacao_service_js_1 = require("../services/movimentacao.service.js");
-const auditoria_service_js_1 = require("../services/auditoria.service.js");
-const movimentacaoService = new movimentacao_service_js_1.MovimentacaoService();
-const auditoriaService = new auditoria_service_js_1.AuditoriaService();
-class MovimentacaoController {
+import { MovimentacaoService } from '../services/movimentacao.service.js';
+import { AuditoriaService } from '../services/auditoria.service.js';
+const movimentacaoService = new MovimentacaoService();
+const auditoriaService = new AuditoriaService();
+export class MovimentacaoController {
     async criar(request, reply) {
         const body = request.body;
         if (!body.produtoId ||
@@ -81,4 +78,3 @@ class MovimentacaoController {
         });
     }
 }
-exports.MovimentacaoController = MovimentacaoController;

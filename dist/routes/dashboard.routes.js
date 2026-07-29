@@ -1,15 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = dashboardRoutes;
-const dashboard_controller_js_1 = require("../controllers/dashboard.controller.js");
-const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
-const role_middleware_js_1 = require("../middlewares/role.middleware.js");
-const dashboardController = new dashboard_controller_js_1.DashboardController();
-async function dashboardRoutes(app) {
+import { DashboardController } from '../controllers/dashboard.controller.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { verificarRole } from '../middlewares/role.middleware.js';
+const dashboardController = new DashboardController();
+export default async function dashboardRoutes(app) {
     app.get('/dashboard', {
         preHandler: [
-            auth_middleware_js_1.authMiddleware,
-            (0, role_middleware_js_1.verificarRole)([
+            authMiddleware,
+            verificarRole([
                 'admin',
                 'gerente'
             ])

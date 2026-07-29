@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MovimentacaoService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-const AppError_js_1 = require("../errors/AppError.js");
+import { prisma } from '../lib/prisma.js';
+import { AppError } from '../errors/AppError.js';
 const tiposValidos = [
     'entrada',
     'saida'
@@ -12,18 +9,18 @@ const motivosValidos = [
     'ajuste',
     'perda'
 ];
-class MovimentacaoService {
+export class MovimentacaoService {
     async criar(data) {
         if (data.quantidade <= 0) {
-            throw new AppError_js_1.AppError('Quantidade deve ser maior que zero.', 400);
+            throw new AppError('Quantidade deve ser maior que zero.', 400);
         }
         if (!tiposValidos.includes(data.tipo)) {
-            throw new AppError_js_1.AppError('Tipo de movimentação inválido.', 400);
+            throw new AppError('Tipo de movimentação inválido.', 400);
         }
         if (!motivosValidos.includes(data.motivo)) {
-            throw new AppError_js_1.AppError('Motivo de movimentação inválido.', 400);
+            throw new AppError('Motivo de movimentação inválido.', 400);
         }
-        return prisma_js_1.prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx) => {
             const produto = await tx.produto.findFirst({
                 where: {
                     id: BigInt(data.produtoId),
@@ -32,11 +29,11 @@ class MovimentacaoService {
                 }
             });
             if (!produto) {
-                throw new AppError_js_1.AppError('Produto não encontrado.', 404);
+                throw new AppError('Produto não encontrado.', 404);
             }
             if (data.tipo === 'saida' &&
                 produto.quantidade < data.quantidade) {
-                throw new AppError_js_1.AppError('Estoque insuficiente.', 400);
+                throw new AppError('Estoque insuficiente.', 400);
             }
             const quantidadeAtualizada = await tx.produto.update({
                 where: {
@@ -68,7 +65,7 @@ class MovimentacaoService {
         });
     }
     async listar(empresaId) {
-        return prisma_js_1.prisma.movimentacaoEstoque.findMany({
+        return prisma.movimentacaoEstoque.findMany({
             where: {
                 empresaId: BigInt(empresaId)
             },
@@ -86,4 +83,3 @@ class MovimentacaoService {
         });
     }
 }
-exports.MovimentacaoService = MovimentacaoService;

@@ -1,43 +1,37 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsuarioService = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const prisma_js_1 = require("../lib/prisma.js");
-const AppError_js_1 = require("../errors/AppError.js");
+import bcrypt from 'bcrypt';
+import { prisma } from '../lib/prisma.js';
+import { AppError } from '../errors/AppError.js';
 const rolesValidas = [
     'admin',
     'gerente',
     'funcionario'
 ];
-class UsuarioService {
+export class UsuarioService {
     async criar(data) {
         if (!data.nome || !data.nome.trim()) {
-            throw new AppError_js_1.AppError('Nome do usuário é obrigatório.', 400);
+            throw new AppError('Nome do usuário é obrigatório.', 400);
         }
         if (!data.email || !data.email.includes('@')) {
-            throw new AppError_js_1.AppError('E-mail inválido.', 400);
+            throw new AppError('E-mail inválido.', 400);
         }
         if (!data.senha || data.senha.length < 6) {
-            throw new AppError_js_1.AppError('A senha deve ter pelo menos 6 caracteres.', 400);
+            throw new AppError('A senha deve ter pelo menos 6 caracteres.', 400);
         }
         if (data.role &&
             !rolesValidas.includes(data.role)) {
-            throw new AppError_js_1.AppError('Role inválida.', 400);
+            throw new AppError('Role inválida.', 400);
         }
         const empresaId = BigInt(data.empresaId);
-        const usuarioExistente = await prisma_js_1.prisma.usuario.findUnique({
+        const usuarioExistente = await prisma.usuario.findUnique({
             where: {
                 email: data.email
             }
         });
         if (usuarioExistente) {
-            throw new AppError_js_1.AppError('E-mail já cadastrado.', 400);
+            throw new AppError('E-mail já cadastrado.', 400);
         }
-        const senhaHash = await bcrypt_1.default.hash(data.senha, 10);
-        const usuario = await prisma_js_1.prisma.usuario.create({
+        const senhaHash = await bcrypt.hash(data.senha, 10);
+        const usuario = await prisma.usuario.create({
             data: {
                 empresaId,
                 nome: data.nome,
@@ -57,7 +51,7 @@ class UsuarioService {
         return usuario;
     }
     async listar(empresaId) {
-        return prisma_js_1.prisma.usuario.findMany({
+        return prisma.usuario.findMany({
             where: {
                 empresaId: BigInt(empresaId)
             },
@@ -75,7 +69,7 @@ class UsuarioService {
         });
     }
     async buscarPorId(id, empresaId) {
-        const usuario = await prisma_js_1.prisma.usuario.findFirst({
+        const usuario = await prisma.usuario.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
@@ -90,7 +84,7 @@ class UsuarioService {
             }
         });
         if (!usuario) {
-            throw new AppError_js_1.AppError('Usuário não encontrado.', 404);
+            throw new AppError('Usuário não encontrado.', 404);
         }
         return usuario;
     }
@@ -98,13 +92,13 @@ class UsuarioService {
         const dados = {};
         if (data.nome !== undefined) {
             if (!data.nome.trim()) {
-                throw new AppError_js_1.AppError('Nome do usuário é obrigatório.', 400);
+                throw new AppError('Nome do usuário é obrigatório.', 400);
             }
             dados.nome = data.nome;
         }
         if (data.role) {
             if (!rolesValidas.includes(data.role)) {
-                throw new AppError_js_1.AppError('Role inválida.', 400);
+                throw new AppError('Role inválida.', 400);
             }
             dados.role = data.role;
         }
@@ -113,12 +107,12 @@ class UsuarioService {
         }
         if (data.senha) {
             if (data.senha.length < 6) {
-                throw new AppError_js_1.AppError('A senha deve ter pelo menos 6 caracteres.', 400);
+                throw new AppError('A senha deve ter pelo menos 6 caracteres.', 400);
             }
             dados.senhaHash =
-                await bcrypt_1.default.hash(data.senha, 10);
+                await bcrypt.hash(data.senha, 10);
         }
-        const usuario = await prisma_js_1.prisma.usuario.updateMany({
+        const usuario = await prisma.usuario.updateMany({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
@@ -126,14 +120,14 @@ class UsuarioService {
             data: dados
         });
         if (usuario.count === 0) {
-            throw new AppError_js_1.AppError('Usuário não encontrado.', 404);
+            throw new AppError('Usuário não encontrado.', 404);
         }
         return {
             mensagem: 'Usuário atualizado com sucesso'
         };
     }
     async remover(id, empresaId) {
-        const usuario = await prisma_js_1.prisma.usuario.updateMany({
+        const usuario = await prisma.usuario.updateMany({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
@@ -143,11 +137,10 @@ class UsuarioService {
             }
         });
         if (usuario.count === 0) {
-            throw new AppError_js_1.AppError('Usuário não encontrado.', 404);
+            throw new AppError('Usuário não encontrado.', 404);
         }
         return {
             mensagem: 'Usuário desativado com sucesso'
         };
     }
 }
-exports.UsuarioService = UsuarioService;

@@ -1,36 +1,33 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProdutoService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-const AppError_js_1 = require("../errors/AppError.js");
-class ProdutoService {
+import { prisma } from '../lib/prisma.js';
+import { AppError } from '../errors/AppError.js';
+export class ProdutoService {
     async create(data) {
         if (!data.nome || !data.nome.trim()) {
-            throw new AppError_js_1.AppError('Nome do produto é obrigatório.', 400);
+            throw new AppError('Nome do produto é obrigatório.', 400);
         }
         if (data.precoCusto !== undefined &&
             data.precoCusto < 0) {
-            throw new AppError_js_1.AppError('Preço de custo não pode ser negativo.', 400);
+            throw new AppError('Preço de custo não pode ser negativo.', 400);
         }
         if (data.precoVenda !== undefined &&
             data.precoVenda < 0) {
-            throw new AppError_js_1.AppError('Preço de venda não pode ser negativo.', 400);
+            throw new AppError('Preço de venda não pode ser negativo.', 400);
         }
         if (data.quantidade !== undefined &&
             data.quantidade < 0) {
-            throw new AppError_js_1.AppError('Quantidade não pode ser negativa.', 400);
+            throw new AppError('Quantidade não pode ser negativa.', 400);
         }
         if (data.estoqueMinimo !== undefined &&
             data.estoqueMinimo < 0) {
-            throw new AppError_js_1.AppError('Estoque mínimo não pode ser negativo.', 400);
+            throw new AppError('Estoque mínimo não pode ser negativo.', 400);
         }
-        const empresaExists = await prisma_js_1.prisma.empresa.findUnique({
+        const empresaExists = await prisma.empresa.findUnique({
             where: { id: BigInt(data.empresaId) }
         });
         if (!empresaExists) {
-            throw new AppError_js_1.AppError('Empresa não encontrada.', 404);
+            throw new AppError('Empresa não encontrada.', 404);
         }
-        const produto = await prisma_js_1.prisma.produto.create({
+        const produto = await prisma.produto.create({
             data: {
                 empresaId: BigInt(data.empresaId),
                 nome: data.nome,
@@ -50,7 +47,7 @@ class ProdutoService {
             ativo: true
         };
         const [produtos, total] = await Promise.all([
-            prisma_js_1.prisma.produto.findMany({
+            prisma.produto.findMany({
                 where,
                 orderBy: {
                     nome: "asc"
@@ -58,7 +55,7 @@ class ProdutoService {
                 skip,
                 take: limit
             }),
-            prisma_js_1.prisma.produto.count({
+            prisma.produto.count({
                 where
             })
         ]);
@@ -71,7 +68,7 @@ class ProdutoService {
         };
     }
     async findById(id, empresaId) {
-        const produto = await prisma_js_1.prisma.produto.findFirst({
+        const produto = await prisma.produto.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId),
@@ -79,32 +76,32 @@ class ProdutoService {
             }
         });
         if (!produto) {
-            throw new AppError_js_1.AppError('Produto não encontrado.', 404);
+            throw new AppError('Produto não encontrado.', 404);
         }
         return produto;
     }
     async update(id, empresaId, data) {
         await this.findById(id, empresaId);
         if (data.nome !== undefined && !data.nome.trim()) {
-            throw new AppError_js_1.AppError('Nome do produto é obrigatório.', 400);
+            throw new AppError('Nome do produto é obrigatório.', 400);
         }
         if (data.precoCusto !== undefined &&
             data.precoCusto < 0) {
-            throw new AppError_js_1.AppError('Preço de custo não pode ser negativo.', 400);
+            throw new AppError('Preço de custo não pode ser negativo.', 400);
         }
         if (data.precoVenda !== undefined &&
             data.precoVenda < 0) {
-            throw new AppError_js_1.AppError('Preço de venda não pode ser negativo.', 400);
+            throw new AppError('Preço de venda não pode ser negativo.', 400);
         }
         if (data.quantidade !== undefined &&
             data.quantidade < 0) {
-            throw new AppError_js_1.AppError('Quantidade não pode ser negativa.', 400);
+            throw new AppError('Quantidade não pode ser negativa.', 400);
         }
         if (data.estoqueMinimo !== undefined &&
             data.estoqueMinimo < 0) {
-            throw new AppError_js_1.AppError('Estoque mínimo não pode ser negativo.', 400);
+            throw new AppError('Estoque mínimo não pode ser negativo.', 400);
         }
-        return prisma_js_1.prisma.produto.update({
+        return prisma.produto.update({
             where: {
                 id: BigInt(id)
             },
@@ -120,7 +117,7 @@ class ProdutoService {
     }
     async delete(id, empresaId) {
         await this.findById(id, empresaId);
-        return prisma_js_1.prisma.produto.update({
+        return prisma.produto.update({
             where: {
                 id: BigInt(id)
             },
@@ -130,4 +127,3 @@ class ProdutoService {
         });
     }
 }
-exports.ProdutoService = ProdutoService;

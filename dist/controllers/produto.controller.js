@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProdutoController = void 0;
-const produto_service_js_1 = require("../services/produto.service.js");
-const auditoria_service_js_1 = require("../services/auditoria.service.js");
-const produtoService = new produto_service_js_1.ProdutoService();
+import { ProdutoService } from '../services/produto.service.js';
+import { AuditoriaService } from '../services/auditoria.service.js';
+const produtoService = new ProdutoService();
 function formatarProduto(produto) {
     return {
         ...produto,
@@ -13,7 +10,7 @@ function formatarProduto(produto) {
         precoVenda: produto.precoVenda.toString(),
     };
 }
-class ProdutoController {
+export class ProdutoController {
     async create(request, reply) {
         const { nome, codigoBarras, precoCusto, precoVenda, quantidade, estoqueMinimo } = request.body;
         const produto = await produtoService.create({
@@ -25,7 +22,7 @@ class ProdutoController {
             quantidade,
             estoqueMinimo
         });
-        const auditoriaService = new auditoria_service_js_1.AuditoriaService();
+        const auditoriaService = new AuditoriaService();
         await auditoriaService.registrar({
             empresaId: request.empresaId,
             usuarioId: request.usuarioId,
@@ -59,7 +56,7 @@ class ProdutoController {
     async update(request, reply) {
         const { id } = request.params;
         const produto = await produtoService.update(id, request.empresaId, request.body);
-        const auditoriaService = new auditoria_service_js_1.AuditoriaService();
+        const auditoriaService = new AuditoriaService();
         await auditoriaService.registrar({
             empresaId: request.empresaId,
             usuarioId: request.usuarioId,
@@ -75,7 +72,7 @@ class ProdutoController {
     async delete(request, reply) {
         const { id } = request.params;
         await produtoService.delete(id, request.empresaId);
-        const auditoriaService = new auditoria_service_js_1.AuditoriaService();
+        const auditoriaService = new AuditoriaService();
         await auditoriaService.registrar({
             empresaId: request.empresaId,
             usuarioId: request.usuarioId,
@@ -88,4 +85,3 @@ class ProdutoController {
         });
     }
 }
-exports.ProdutoController = ProdutoController;

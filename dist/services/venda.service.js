@@ -1,19 +1,16 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VendaService = void 0;
-const prisma_js_1 = require("../lib/prisma.js");
-const AppError_js_1 = require("../errors/AppError.js");
-class VendaService {
+import { prisma } from '../lib/prisma.js';
+import { AppError } from '../errors/AppError.js';
+export class VendaService {
     async criar(data) {
         if (!data.itens || data.itens.length === 0) {
-            throw new AppError_js_1.AppError('A venda precisa ter pelo menos um item.', 400);
+            throw new AppError('A venda precisa ter pelo menos um item.', 400);
         }
         for (const item of data.itens) {
             if (item.quantidade <= 0) {
-                throw new AppError_js_1.AppError('A quantidade do produto deve ser maior que zero.', 400);
+                throw new AppError('A quantidade do produto deve ser maior que zero.', 400);
             }
         }
-        return prisma_js_1.prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx) => {
             if (data.clienteId) {
                 const cliente = await tx.cliente.findFirst({
                     where: {
@@ -22,7 +19,7 @@ class VendaService {
                     }
                 });
                 if (!cliente) {
-                    throw new AppError_js_1.AppError('Cliente não encontrado.', 404);
+                    throw new AppError('Cliente não encontrado.', 404);
                 }
             }
             let valorTotal = 0;
@@ -36,10 +33,10 @@ class VendaService {
                     }
                 });
                 if (!produto) {
-                    throw new AppError_js_1.AppError('Produto não encontrado.', 404);
+                    throw new AppError('Produto não encontrado.', 404);
                 }
                 if (produto.quantidade < item.quantidade) {
-                    throw new AppError_js_1.AppError(`Estoque insuficiente para ${produto.nome}`, 400);
+                    throw new AppError(`Estoque insuficiente para ${produto.nome}`, 400);
                 }
                 valorTotal +=
                     Number(produto.precoVenda) *
@@ -98,7 +95,7 @@ class VendaService {
         });
     }
     async buscarPorId(id, empresaId) {
-        const venda = await prisma_js_1.prisma.venda.findFirst({
+        const venda = await prisma.venda.findFirst({
             where: {
                 id: BigInt(id),
                 empresaId: BigInt(empresaId)
@@ -113,12 +110,12 @@ class VendaService {
             }
         });
         if (!venda) {
-            throw new AppError_js_1.AppError('Venda não encontrada.', 404);
+            throw new AppError('Venda não encontrada.', 404);
         }
         return venda;
     }
     async listar(empresaId) {
-        return prisma_js_1.prisma.venda.findMany({
+        return prisma.venda.findMany({
             where: {
                 empresaId: BigInt(empresaId)
             },
@@ -136,7 +133,7 @@ class VendaService {
         });
     }
     async cancelar(id, empresaId) {
-        return prisma_js_1.prisma.$transaction(async (tx) => {
+        return prisma.$transaction(async (tx) => {
             const venda = await tx.venda.findFirst({
                 where: {
                     id: BigInt(id),
@@ -147,10 +144,10 @@ class VendaService {
                 }
             });
             if (!venda) {
-                throw new AppError_js_1.AppError('Venda não encontrada.', 404);
+                throw new AppError('Venda não encontrada.', 404);
             }
             if (venda.status === 'cancelada') {
-                throw new AppError_js_1.AppError('Venda já está cancelada.', 400);
+                throw new AppError('Venda já está cancelada.', 400);
             }
             for (const item of venda.itens) {
                 await tx.produto.update({
@@ -185,4 +182,3 @@ class VendaService {
         });
     }
 }
-exports.VendaService = VendaService;

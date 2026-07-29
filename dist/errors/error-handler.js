@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorHandler = errorHandler;
-const AppError_js_1 = require("./AppError.js");
-function errorHandler(app) {
+import { AppError } from './AppError.js';
+export function errorHandler(app) {
     app.setErrorHandler(async (error, request, reply) => {
         request.log.error(error);
-        if (error instanceof AppError_js_1.AppError) {
+        if (error instanceof AppError) {
             return reply
                 .status(error.statusCode)
                 .send({

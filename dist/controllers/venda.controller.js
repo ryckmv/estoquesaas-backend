@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VendaController = void 0;
-const venda_service_js_1 = require("../services/venda.service.js");
-const auditoria_service_js_1 = require("../services/auditoria.service.js");
-const vendaService = new venda_service_js_1.VendaService();
-const auditoriaService = new auditoria_service_js_1.AuditoriaService();
-class VendaController {
+import { VendaService } from '../services/venda.service.js';
+import { AuditoriaService } from '../services/auditoria.service.js';
+const vendaService = new VendaService();
+const auditoriaService = new AuditoriaService();
+export class VendaController {
     async criar(request, reply) {
         const body = request.body;
         if (!body.itens || body.itens.length === 0) {
@@ -125,4 +122,3 @@ class VendaController {
         });
     }
 }
-exports.VendaController = VendaController;
