@@ -271,4 +271,45 @@ export class DashboardService {
             .sort((a, b) => b.quantidade - a.quantidade)
             .slice(0, 5);
     }
+    async resumoMaster() {
+        const [empresas, usuarios, produtos, clientes, vendas] = await Promise.all([
+            prisma.empresa.count(),
+            prisma.usuario.count({
+                where: {
+                    ativo: true
+                }
+            }),
+            prisma.produto.count({
+                where: {
+                    ativo: true
+                }
+            }),
+            prisma.cliente.count(),
+            prisma.venda.count({
+                where: {
+                    status: "confirmada"
+                }
+            })
+        ]);
+        const faturamento = await prisma.venda.aggregate({
+            where: {
+                status: "confirmada"
+            },
+            _sum: {
+                valorTotal: true
+            }
+        });
+        return {
+            resumo: {
+                empresas,
+                usuarios,
+                produtos,
+                clientes,
+                vendas
+            },
+            financeiro: {
+                faturamentoTotal: Number(faturamento._sum.valorTotal ?? 0)
+            }
+        };
+    }
 }

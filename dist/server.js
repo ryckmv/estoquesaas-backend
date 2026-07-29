@@ -19,6 +19,13 @@ dotenv.config();
 const app = Fastify({
     logger: true
 });
+// ✅ CORREÇÃO APLICADA: CORS registrado no topo para liberar o acesso da Vercel
+await app.register(cors, {
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+});
 errorHandler(app);
 // Rota inicial
 app.get('/', async () => {
@@ -61,9 +68,6 @@ app.register(configuracaoRoutes);
 // Inicialização do servidor
 const start = async () => {
     try {
-        await app.register(cors, {
-            origin: process.env.FRONTEND_URL || "http://localhost:3000"
-        });
         const port = Number(process.env.PORT) || 3334;
         await app.listen({
             port,

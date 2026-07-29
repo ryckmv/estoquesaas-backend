@@ -23,15 +23,19 @@ export async function login({ email, senha }) {
     }
     const token = gerarToken({
         usuarioId: usuario.id.toString(),
-        empresaId: usuario.empresaId.toString(),
+        empresaId: usuario.empresaId
+            ? usuario.empresaId.toString()
+            : null,
         role: usuario.role,
     });
-    await auditoriaService.registrar({
-        empresaId: usuario.empresaId,
-        usuarioId: usuario.id,
-        acao: "LOGIN_REALIZADO",
-        detalhes: `Usuário ${usuario.nome} realizou login`
-    });
+    if (usuario.empresaId) {
+        await auditoriaService.registrar({
+            empresaId: usuario.empresaId,
+            usuarioId: usuario.id,
+            acao: "LOGIN_REALIZADO",
+            detalhes: `Usuário ${usuario.nome} realizou login`
+        });
+    }
     return {
         token,
         usuario: {
@@ -40,9 +44,11 @@ export async function login({ email, senha }) {
             email: usuario.email,
             role: usuario.role,
         },
-        empresa: {
-            id: usuario.empresa.id.toString(),
-            nome: usuario.empresa.nome,
-        },
+        empresa: usuario.empresa
+            ? {
+                id: usuario.empresa.id.toString(),
+                nome: usuario.empresa.nome,
+            }
+            : null,
     };
 }
