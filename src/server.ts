@@ -16,6 +16,7 @@ import { errorHandler } from './errors/error-handler.js';
 import relatorioRoutes from './routes/relatorio.routes.js';
 import { auditoriaRoutes } from './routes/auditoria.routes.js';
 import { configuracaoRoutes } from "./routes/configuracao.routes.js";
+import masterRoutes from "./routes/master.routes.js";
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.register(dashboardRoutes);
 app.register(relatorioRoutes);
 app.register(auditoriaRoutes);
 app.register(configuracaoRoutes);
+app.register(masterRoutes);
 
 // Inicialização do servidor
 const start = async () => {
